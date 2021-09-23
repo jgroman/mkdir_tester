@@ -2,4 +2,4 @@
 
 ## Dependencies
 
-pip install pytest sh
+pip install pytest sh click

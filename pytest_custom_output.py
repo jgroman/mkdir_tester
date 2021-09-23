@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 '''
+Custom pytest output plugin
 
-Some parts of code adopted from:
+
+Portions of code adopted from:
 
 https://github.com/freakboy3742/pytest-tldr
 https://github.com/pchomik/pytest-spec
@@ -55,7 +57,8 @@ def pytest_runtest_makereport(item, call):
     report = outcome.get_result()
     node = getattr(item, 'obj', None)
     if node and item.obj.__doc__:
-        report.docstring_summary = str(item.obj.__doc__).lstrip().split("\n")[0].strip()
+        report.docstring_summary = str(
+            item.obj.__doc__).lstrip().split("\n")[0].strip()
 
 
 class CustomReporter:
@@ -64,7 +67,8 @@ class CustomReporter:
         self.file = file if file is not None else sys.stdout
 
         self.verbosity = self.config.option.verbose
-        self.xdist = getattr(self.config.option, 'numprocesses', None) is not None
+        self.xdist = getattr(self.config.option,
+                             'numprocesses', None) is not None
         self.hasmarkup = False
 
         self.stats = {}
@@ -154,15 +158,18 @@ class CustomReporter:
     def report_fail(self, report):
         self.stats.setdefault('F', []).append(report)
         reprcrash = getattr(report.longrepr, 'reprcrash', None)
-        message = getattr(reprcrash, 'message', None)
-        items = re.findall("AssertionError: (.*)$", message, re.MULTILINE)
-        self.print('[FAIL] {}, {}'.format(report.docstring_summary, items[0]), flush=True)
+        message = getattr(reprcrash, 'message', [''])
+        items = re.findall("[AssertionError|Failed]: (.*)$",
+                           message, re.MULTILINE)
+        self.print('[FAIL] {}, {}'.format(
+            report.docstring_summary, items[0]), flush=True)
 
     def report_error(self, report):
         self.stats.setdefault('E', []).append(report)
-        reprcrash = getattr(report.longrepr, 'reprcrash', 'zzz')
-        message = getattr(reprcrash, 'message', 'zzz')
-        self.print('[ERROR] {}, {}'.format(report.docstring_summary, message), flush=True)
+        reprcrash = getattr(report.longrepr, 'reprcrash', None)
+        message = getattr(reprcrash, 'message', '')
+        self.print('[ERROR] {}, {}'.format(
+            report.docstring_summary, message), flush=True)
 
     def report_skip(self, report):
         self.stats.setdefault('s', []).append(report)
@@ -170,7 +177,12 @@ class CustomReporter:
 
     def report_expected_failure(self, report):
         self.stats.setdefault('x', []).append(report)
-        self.print('[XFAIL] {}'.format(report.docstring_summary), flush=True)
+        reprcrash = getattr(report.longrepr, 'reprcrash', None)
+        message = getattr(reprcrash, 'message', [''])
+        items = re.findall("[AssertionError|Failed]: (.*)$",
+                           message, re.MULTILINE)
+        self.print('[XFAIL] {}, {}'.format(
+            report.docstring_summary, items[0]), flush=True)
 
     def report_unexpected_success(self, report):
         self.stats.setdefault('u', []).append(report)
@@ -249,8 +261,10 @@ class CustomReporter:
             self.print()
             if failures or errors or upasses:
                 total_fails = len(failures) + len(errors) + len(upasses)
-                self.print("/** TEST FAILED: {} ({}), total {} **/".format(total_fails, ", ".join(problems), self._n_tests))
+                self.print("/** TEST FAILED: {} ({}), total {} **/".format(
+                    total_fails, ", ".join(problems), self._n_tests))
             elif skips or xfails:
-                self.print("/** TEST PASSED: {} ({}) **/".format(self._n_tests, ", ".join(problems)))
+                self.print(
+                    "/** TEST PASSED: {} ({}) **/".format(self._n_tests, ", ".join(problems)))
             else:
                 self.print("/** TEST PASSED: {} **/".format(self._n_tests))
