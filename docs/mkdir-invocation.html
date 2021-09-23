@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- This manual documents version 8.32 of the GNU core
+utilities, including the standard programs for text and file manipulation.
+
+Copyright (C) 1994-2020 Free Software Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled "GNU
+Free Documentation License". -->
+<!-- Created by GNU Texinfo 6.6, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>mkdir invocation (GNU Coreutils)</title>
+
+<meta name="description" content="mkdir invocation (GNU Coreutils)">
+<meta name="keywords" content="mkdir invocation (GNU Coreutils)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Concept-index.html#Concept-index" rel="index" title="Concept index">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Special-file-types.html#Special-file-types" rel="up" title="Special file types">
+<link href="mkfifo-invocation.html#mkfifo-invocation" rel="next" title="mkfifo invocation">
+<link href="ln-invocation.html#ln-invocation" rel="prev" title="ln invocation">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+<link rel="stylesheet" type="text/css" href="/software/gnulib/manual.css">
+
+
+</head>
+
+<body lang="en">
+<span id="mkdir-invocation"></span><div class="header">
+<p>
+Next: <a href="mkfifo-invocation.html#mkfifo-invocation" accesskey="n" rel="next">mkfifo invocation</a>, Previous: <a href="ln-invocation.html#ln-invocation" accesskey="p" rel="prev">ln invocation</a>, Up: <a href="Special-file-types.html#Special-file-types" accesskey="u" rel="up">Special file types</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Concept-index.html#Concept-index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<span id="mkdir_003a-Make-directories"></span><h3 class="section">12.3 <code>mkdir</code>: Make directories</h3>
+
+<span id="index-mkdir"></span>
+<span id="index-directories_002c-creating"></span>
+<span id="index-creating-directories"></span>
+
+<p><code>mkdir</code> creates directories with the specified names.  Synopsis:
+</p>
+<div class="example">
+<pre class="example">mkdir [<var>option</var>]&hellip; <var>name</var>&hellip;
+</pre></div>
+
+<p><code>mkdir</code> creates each directory <var>name</var> in the order given.
+It reports an error if <var>name</var> already exists, unless the
+<samp>-p</samp> option is given and <var>name</var> is a directory.
+</p>
+<p>The program accepts the following options.  Also see <a href="Common-options.html#Common-options">Common options</a>.
+</p>
+<dl compact="compact">
+<dt>&lsquo;<samp>-m <var>mode</var></samp>&rsquo;</dt>
+<dt>&lsquo;<samp>--mode=<var>mode</var></samp>&rsquo;</dt>
+<dd><span id="index-_002dm-5"></span>
+<span id="index-_002d_002dmode-1"></span>
+<span id="index-modes-of-created-directories_002c-setting"></span>
+<p>Set the file permission bits of created directories to <var>mode</var>,
+which uses the same syntax as
+in <code>chmod</code> and uses &lsquo;<samp>a=rwx</samp>&rsquo; (read, write and execute allowed for
+everyone) for the point of the departure.  See <a href="File-permissions.html#File-permissions">File permissions</a>.
+</p>
+<p>Normally the directory has the desired file mode bits at the moment it
+is created.  As a GNU extension, <var>mode</var> may also mention
+special mode bits, but in this case there may be a temporary window
+during which the directory exists but its special mode bits are
+incorrect.  See <a href="Directory-Setuid-and-Setgid.html#Directory-Setuid-and-Setgid">Directory Setuid and Setgid</a>, for how the
+set-user-ID and set-group-ID bits of directories are inherited unless
+overridden in this way.
+</p>
+</dd>
+<dt>&lsquo;<samp>-p</samp>&rsquo;</dt>
+<dt>&lsquo;<samp>--parents</samp>&rsquo;</dt>
+<dd><span id="index-_002dp-5"></span>
+<span id="index-_002d_002dparents-1"></span>
+<span id="index-parent-directories_002c-creating"></span>
+<p>Make any missing parent directories for each argument, setting their
+file permission bits to the umask modified by &lsquo;<samp>u+wx</samp>&rsquo;.  Ignore
+existing parent directories, and do not change their file permission
+bits.
+</p>
+<p>To set the file permission bits of any newly-created parent
+directories to a value that includes &lsquo;<samp>u+wx</samp>&rsquo;, you can set the
+umask before invoking <code>mkdir</code>.  For example, if the shell
+command &lsquo;<samp>(umask u=rwx,go=rx; mkdir -p P/Q)</samp>&rsquo; creates the parent
+<samp>P</samp> it sets the parent&rsquo;s permission bits to &lsquo;<samp>u=rwx,go=rx</samp>&rsquo;.
+To set a parent&rsquo;s special mode bits as well, you can invoke
+<code>chmod</code> after <code>mkdir</code>.  See <a href="Directory-Setuid-and-Setgid.html#Directory-Setuid-and-Setgid">Directory Setuid and Setgid</a>, for how the set-user-ID and set-group-ID bits of
+newly-created parent directories are inherited.
+</p>
+</dd>
+<dt>&lsquo;<samp>-v</samp>&rsquo;</dt>
+<dt>&lsquo;<samp>--verbose</samp>&rsquo;</dt>
+<dd><span id="index-_002dv-13"></span>
+<span id="index-_002d_002dverbose-9"></span>
+<p>Print a message for each created directory.  This is most useful with
+<samp>--parents</samp>.
+</p>
+</dd>
+<dt>&lsquo;<samp>-Z</samp>&rsquo;</dt>
+<dt>&lsquo;<samp>--context[=<var>context</var>]</samp>&rsquo;</dt>
+<dd><span id="index-_002dZ-4"></span>
+<span id="index-_002d_002dcontext-4"></span>
+<span id="index-SELinux_002c-setting_002frestoring-security-context-2"></span>
+<span id="index-security-context-5"></span>
+<p>Without a specified <var>context</var>, adjust the SELinux security context according
+to the system default type for destination files, similarly to the
+<code>restorecon</code> command.
+The long form of this option with a specific context specified,
+will set the context for newly created files only.
+With a specified context, if both SELinux and SMACK are disabled, a warning is
+issued.
+</p>
+</dd>
+</dl>
+
+<p>An exit status of zero indicates success,
+and a nonzero value indicates failure.
+</p>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="mkfifo-invocation.html#mkfifo-invocation" accesskey="n" rel="next">mkfifo invocation</a>, Previous: <a href="ln-invocation.html#ln-invocation" accesskey="p" rel="prev">ln invocation</a>, Up: <a href="Special-file-types.html#Special-file-types" accesskey="u" rel="up">Special file types</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Concept-index.html#Concept-index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>
