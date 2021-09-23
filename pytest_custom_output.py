@@ -49,21 +49,6 @@ def pytest_configure(config):
         config.option.tbstyle = 'native'
 
 
-def _plugin_nameversions(plugininfo):
-    values = []
-    for plugin, dist in plugininfo:
-        # gets us name and version!
-        name = "{dist.project_name}-{dist.version}".format(dist=dist)
-        # questionable convenience, but it keeps things short
-        if name.startswith("pytest-"):
-            name = name[7:]
-        # we decided to print python package names
-        # they can have more than one plugin
-        if name not in values:
-            values.append(name)
-    return values
-
-
 @pytest.mark.hookwrapper
 def pytest_runtest_makereport(item, call):
     outcome = yield
@@ -153,51 +138,10 @@ class CustomReporter:
             self.write_line("INTERNALERROR> " + line)
         return 1
 
-    def pytest_collectreport(self, report):
-        if report.failed:
-            self.print("=" * 78)
-            self.print("CRITICAL: {}".format(report.nodeid))
-            self.print("-" * 78)
-            self.print(report.longreprtext)
-
     def pytest_sessionstart(self, session):
         self._starttime = time.time()
         self._n_tests = 0
         self._started = False
-
-        if self.verbosity:
-            verinfo = platform.python_version()
-            msg = "platform {} -- Python {}".format(sys.platform, verinfo)
-            if hasattr(sys, "pypy_version_info"):
-                verinfo = ".".join(map(str, sys.pypy_version_info[:3]))
-                msg += "[pypy-{}-{}]".format(verinfo, sys.pypy_version_info[3])
-            self.print(msg)
-            self.print("pytest=={}".format(pytest.__version__))
-            self.print("py=={}".format(py.__version__))
-            self.print("pluggy=={}".format(pluggy.__version__))
-
-            headers = self.config.hook.pytest_report_header(
-                config=self.config, startdir=py.path.local()
-            )
-            for header in headers:
-                if isinstance(header, str):
-                    self.print(header)
-                else:
-                    for line in header:
-                        self.print(line)
-
-    def pytest_report_header(self, config):
-        lines = [
-            "rootdir: {}".format(config.rootdir),
-        ]
-        if config.inifile:
-            lines.append("inifile: {}".format(config.rootdir.bestrelpath(config.inifile)))
-
-        plugininfo = config.pluginmanager.list_plugin_distinfo()
-        if plugininfo:
-            lines.append("plugins: {}".format(", ".join(_plugin_nameversions(plugininfo))))
-
-        return lines
 
     def pytest_runtest_logstart(self, nodeid, location):
         if not self._started:
@@ -222,15 +166,16 @@ class CustomReporter:
 
     def report_skip(self, report):
         self.stats.setdefault('s', []).append(report)
-        self.print('s', end='', flush=True)
+        self.print('[SKIP] {}'.format(report.docstring_summary), flush=True)
 
     def report_expected_failure(self, report):
         self.stats.setdefault('x', []).append(report)
-        self.print('x', end='', flush=True)
+        self.print('[XFAIL] {}'.format(report.docstring_summary), flush=True)
 
     def report_unexpected_success(self, report):
         self.stats.setdefault('u', []).append(report)
         self.print('u', end='', flush=True)
+        self.print('[UPASS] {}'.format(report.docstring_summary), flush=True)
 
     def pytest_runtest_logreport(self, report):
         if report.when == 'call':
@@ -275,17 +220,11 @@ class CustomReporter:
                     self.report_expected_failure(report)
 
     def pytest_sessionfinish(self, exitstatus):
-        self.print()
-        duration = time.time() - self._starttime
-
         errors = self.stats.get('E', [])
         failures = self.stats.get('F', [])
         upasses = self.stats.get('u', [])
-
-        self.print("Ran {n_tests} tests in {duration:.2f}s".format(
-                n_tests=self._n_tests,
-                duration=duration,
-            ))
+        xfails = self.stats.get('x', [])
+        skips = self.stats.get('s', [])
 
         if exitstatus in {ExitCode.OK, ExitCode.TESTS_FAILED}:
             self.config.hook.pytest_terminal_summary(
@@ -293,9 +232,6 @@ class CustomReporter:
                 terminalreporter=self,
                 exitstatus=exitstatus,
             )
-
-        xfails = self.stats.get('x', [])
-        skips = self.stats.get('s', [])
 
         problems = []
         if errors:
@@ -313,8 +249,8 @@ class CustomReporter:
             self.print()
             if failures or errors or upasses:
                 total_fails = len(failures) + len(errors) + len(upasses)
-                self.print("/** TEST FAILED: {}, total {} **/".format(total_fails, self._n_tests))
-            # elif skips or xfails:
-            #     self.print("OK (" + ", ".join(problems) + ")")
+                self.print("/** TEST FAILED: {} ({}), total {} **/".format(total_fails, ", ".join(problems), self._n_tests))
+            elif skips or xfails:
+                self.print("/** TEST PASSED: {} ({}) **/".format(self._n_tests, ", ".join(problems)))
             else:
                 self.print("/** TEST PASSED: {} **/".format(self._n_tests))
