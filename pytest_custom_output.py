@@ -12,14 +12,10 @@ https://github.com/pchomik/pytest-spec
 
 
 from __future__ import print_function
-from os import error
-import platform
 import sys
 import time
 import re
 
-import pluggy
-import py
 import pytest
 try:
     from pytest import ExitCode
@@ -263,8 +259,12 @@ class CustomReporter:
                 total_fails = len(failures) + len(errors) + len(upasses)
                 self.print("/** TEST FAILED: {} ({}), total {} **/".format(
                     total_fails, ", ".join(problems), self._n_tests))
+                # Override pytest default exit code
+                #pytest.exit(msg=None, returncode=1)
             elif skips or xfails:
                 self.print(
                     "/** TEST PASSED: {} ({}) **/".format(self._n_tests, ", ".join(problems)))
+                # Override pytest default exit code
+                pytest.exit(returncode=0)
             else:
                 self.print("/** TEST PASSED: {} **/".format(self._n_tests))
