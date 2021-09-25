@@ -43,9 +43,8 @@ def get_random_utf8_string(lower_limit=1, upper_limit=20):
 
 class TestNameUtf8:
 
-    @pytest.mark.debug
     def test_create_dir_utf8(self, tmpdir):
-        '''Create directory with valid UTF-8 name'''
+        '''Create directory with valid UTF-8 random length name'''
         name_newdir = get_random_utf8_string(DIR_NAME_LENGTH_MIN, DIR_NAME_LENGTH_MAX)
         path_newdir = tmpdir.join(name_newdir)
 

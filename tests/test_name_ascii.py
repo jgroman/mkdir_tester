@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import py
 import pytest
 import random
 import string
@@ -27,44 +26,34 @@ def get_random_ascii(chars, lower_limit=1, upper_limit=20):
 class TestBasicAscii:
 
     def test_create_single_dir_ascii_length_min(self, tmpdir):
-        '''Create directory with valid ASCII one character long name'''
+        '''Create directory with valid ASCII one character name'''
         # Expected outcome: directory is created
 
         name_newdir = get_random_ascii(DIR_NAME_ALLOWED_CHARS, DIR_NAME_LENGTH_MIN, DIR_NAME_LENGTH_MIN)
         path_newdir = tmpdir.join(name_newdir)
 
-        # Make sure directory doesn't already exist
         try:
-            path_newdir.remove(rec=1, ignore_errors=True)
-        except py.error.ENOENT:
-            # Ignore 'No such file or directory' error
-            pass
-        assert not path_newdir.check(), "Failed test setup - directory '{}' not removed".format(path_newdir)
-
-        sh.mkdir(path_newdir)
-
-        # Directory should now exist
-        assert path_newdir.check(), "Failed to create directory '{}'".format(path_newdir)
+            sh.mkdir(path_newdir)
+        except sh.ErrorReturnCode:
+            pytest.fail("Failed to create directory '{}'".format(path_newdir))
+        else:
+            # Directory should now exist
+            assert path_newdir.check(), "Failed to create directory '{}'".format(path_newdir)
 
     def test_create_single_dir_ascii_length_random(self, tmpdir):
-        '''Create directory with valid random length ASCII name'''
+        '''Create directory with valid ASCII random length name'''
         # Expected outcome: directory is created
 
         name_newdir = get_random_ascii(DIR_NAME_ALLOWED_CHARS, DIR_NAME_LENGTH_MIN, DIR_NAME_LENGTH_MAX)
         path_newdir = tmpdir.join(name_newdir)
 
-        # Make sure directory doesn't already exist
         try:
-            path_newdir.remove(rec=1, ignore_errors=True)
-        except py.error.ENOENT:
-            # Ignore 'No such file or directory' error
-            pass
-        assert not path_newdir.check()
-
-        sh.mkdir(path_newdir)
-
-        # Directory should now exist
-        assert path_newdir.check(), "Failed to create directory '{}'".format(path_newdir)
+            sh.mkdir(path_newdir)
+        except sh.ErrorReturnCode:
+            pytest.fail("Failed to create directory '{}'".format(path_newdir))
+        else:
+            # Directory should now exist
+            assert path_newdir.check(), "Failed to create directory '{}'".format(path_newdir)
 
     def test_create_single_dir_ascii_length_max(self, tmpdir):
         '''Create directory with valid ASCII max length name'''
@@ -73,18 +62,13 @@ class TestBasicAscii:
         name_newdir = get_random_ascii(DIR_NAME_ALLOWED_CHARS, DIR_NAME_LENGTH_MAX, DIR_NAME_LENGTH_MAX)
         path_newdir = tmpdir.join(name_newdir)
 
-        # Make sure directory doesn't already exist
         try:
-            path_newdir.remove(rec=1, ignore_errors=True)
-        except py.error.ENOENT:
-            # Ignore 'No such file or directory' error
-            pass
-        assert not path_newdir.check(), "Failed test setup - directory not removed"
-
-        sh.mkdir(path_newdir)
-
-        # Directory should now exist
-        assert path_newdir.check(), "Failed to create directory '{}'".format(path_newdir)
+            sh.mkdir(path_newdir)
+        except sh.ErrorReturnCode:
+            pytest.fail("Failed to create directory '{}'".format(path_newdir))
+        else:
+            # Directory should now exist
+            assert path_newdir.check(), "Failed to create directory '{}'".format(path_newdir)
 
     def test_create_multiple_dirs(self, tmpdir):
         '''Create multiple directories by single mkdir invocation'''
@@ -100,15 +84,6 @@ class TestBasicAscii:
                 name = 'testdir{}'.format(dir_id)
                 yield tmpdir.join(name)
 
-        # Make sure directories do not already exist
-        for path in get_path(DIR_COUNT):
-            try:
-                path.remove(rec=1, ignore_errors=True)
-            except py.error.ENOENT:
-                # Ignore 'No such file or directory' error
-                pass
-            assert not path.check(), "Failed test setup - directory '{}' not removed".format(path)
-
         # Pass all directory names at once using argument unpacking
         sh.mkdir(*get_path(DIR_COUNT))
 
@@ -117,19 +92,11 @@ class TestBasicAscii:
             assert path.check(), "Failed to create directory '{}'".format(path)
 
     def test_create_dir_name_existing(self, tmpdir):
-        '''Try creating already existing directory name'''
+        '''Try creating directory name already existing'''
         # Expected outcome: mkdir fails with exit code 1
 
         name_newdir = get_random_ascii(DIR_NAME_ALLOWED_CHARS, DIR_NAME_LENGTH_MIN, DIR_NAME_LENGTH_MIN)
         path_newdir = tmpdir.join(name_newdir)
-
-        # Make sure directory doesn't already exist
-        try:
-            path_newdir.remove(rec=1, ignore_errors=True)
-        except py.error.ENOENT:
-            # Ignore 'No such file or directory' error
-            pass
-        assert not path_newdir.check(), "Failed test setup - directory not removed"
 
         # Using built-in mkdir
         path_newdir.mkdir()
@@ -145,8 +112,8 @@ class TestBasicAscii:
             pytest.fail("Created directory with already existing name")
 
     def test_create_dir_name_empty(self):
-        '''Try creating directory with empty name'''
-        # Expected outcome: mkdir fails with exit code 1
+        '''Try creating directory name empty'''
+        # Expected outcome: mkdir exits with error code 1
 
         try:
             sh.mkdir('')
@@ -156,7 +123,7 @@ class TestBasicAscii:
             pytest.fail("Accepted empty string as directory name")
 
     def test_create_dir_name_length_over_max(self, tmpdir):
-        '''Try creating directory with name longer than allowed'''
+        '''Try creating directory name longer than allowed'''
         # Expected outcome: mkdir fails with exit code 1
 
         name_newdir = get_random_ascii(DIR_NAME_ALLOWED_CHARS,
@@ -170,17 +137,40 @@ class TestBasicAscii:
         else:
             pytest.fail("Accepted too long string as directory name")
 
-    def test_create_dir_name_nul_char(self):
-        '''Try creating directory name containing NUL character'''
-        # Expected outcome: mkdir fails
+    def test_create_dir_name_nul_char_only(self, tmpdir):
+        '''Try creating directory name as NUL character only'''
+        # Expected outcome: shell dependent, in bash mkdir exits with error code 1
 
-        # FIXME: Investigate whether created directory name even reaches mkdir
+        path_helper = tmpdir.join("testhelper.sh")
+        path_helper.write_text("#!/bin/bash\n\nmkdir $'\\x00'", encoding="utf-8")
+        path_helper.chmod(0o777)    # Make helper script executable
+        path_helper.dirpath().chdir()
+
         try:
-            sh.mkdir(b'\x31\x00\x32')
-        except sh.ForkException as exc:
-            assert "ValueError" in str(exc), "ValueError exception not raised"
+            sh.Command(path_helper)()   # run helper script
+        except sh.ErrorReturnCode as exc:
+            assert exc.exit_code == 1, "Invalid exit code returned ({})".format(exc.exit_code)
         else:
-            pytest.fail("Accepted directory name containing NUL")
+            pytest.fail("Accepted NUL character as directory name")
+
+    def test_create_dir_name_containing_nul_char(self, tmpdir):
+        '''Try creating directory name containing NUL character'''
+        # Expected outcome: shell dependent, in bash mkdir creates directory name
+        # containing part of requested name up to NUL character
+
+        path_helper = tmpdir.join("testhelper.sh")
+        path_helper.write_text("#!/bin/bash\n\nmkdir $'first\\x00second'", encoding="utf-8")
+        path_helper.chmod(0o777)    # Make helper script executable
+        path_helper.dirpath().chdir()
+
+        path_newdir = tmpdir.join("first")
+
+        try:
+            sh.Command(path_helper)()   # run helper script
+        except sh.ErrorReturnCode:
+            pytest.fail("Failed to create directory")
+        else:
+            assert path_newdir.check(), "Failed to create directory '{}'".format(path_newdir)
 
     def test_create_dir_name_forward_slash(self, tmpdir):
         '''Try creating directory name containing forward slash character'''
