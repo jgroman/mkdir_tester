@@ -13,7 +13,7 @@ installed:
 
 pip3 install pytest sh
 
-The complete suite is run from this package root directory by using 
+The complete suite is run from this package root directory by issuing 
 the following command:
 
 pytest

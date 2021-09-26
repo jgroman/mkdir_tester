@@ -26,14 +26,17 @@ For detailed information regarding using Python on Oracle Linux please refer to 
 
 ### Running tests
 
-Running complete test suite
+Running complete test suite with customized result output
 
 ```bash
 pytest
 ```
 
+Running test suite with standard pytest result output
 
-
+```bash
+pytest -p no:pytest_custom_output
+```
 
 ## Test approach
 
@@ -67,10 +70,12 @@ Although it's highly recommend to avoid newlines, tabs, control characters, and 
 
 #### Path length
 
-On Linux: The maximum length for a file name is 255 bytes. The maximum combined length of both the file name and path name is 4096 bytes. This length matches the PATH_MAX that is supported by the operating system.
+On Linux: The maximum length for a file name is 255 bytes (NAME_MAX).
+
+The maximum combined length of both the file name and path name is 4096 bytes. This length matches the PATH_MAX that is supported by the operating system as some syscalls allocate PATH_MAX bytes for certain operations. It is possible to have longer file paths but it is only possible to open such files using shorter relative paths since the full (canonical) path will error out.
 
 #### Directory limit
 
-The limit on ext4 is 64000. Until you enable the file system feature flag dir_nlink.
-
 On ext3, there is technically a limit of 32,000 subdirectories but each directory always includes two links – one to reference itself and another to reference the parent directory – that leaves us with 31,998 to work with.
+
+The default limit on ext4 is 64000 and it can be set by enabling file system feature flag `dir_nlink`.
