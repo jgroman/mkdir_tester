@@ -5,15 +5,18 @@ import sh
 
 
 class TestDirMultiple:
+    """
+    Class for grouping multiple directory creation tests.
+    """
 
-    # Generator for fixed number of directory paths
+    # Generator for given number of directory paths
     @staticmethod
     def get_path(tmpdir: py.path.local, count: int) -> py.path.local:
         for dir_id in range(count):
             name = 'testdir{}'.format(dir_id)
             yield tmpdir.join(name)
 
-    def test_create_multiple_dirs_same_level(self, tmpdir):
+    def test_create_multiple_sibling_dirs(self, tmpdir):
         '''Create directory: multiple siblings'''
         # Expected outcome: all directories are created
 

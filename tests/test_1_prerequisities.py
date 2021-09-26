@@ -6,6 +6,9 @@ import pytest
 
 @pytest.mark.incremental
 class TestPrerequisities:
+    """
+    Class for grouping tests for test suite prerequisities.
+    """
 
     def test_import_packages(self):
         '''Selfcheck: Import required packages'''

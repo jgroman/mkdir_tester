@@ -3,15 +3,18 @@
 import curses.ascii
 import pytest
 import random
+import sh
 import string
 
-import sh
 
 DIR_NAME_LENGTH_MIN = 1
 DIR_NAME_LENGTH_MAX = 255
 
 
 class TestNameAscii:
+    """
+    Class for grouping basic directory creation tests using ASCII names.
+    """
 
     @staticmethod
     def get_random_string(chars, lower_limit=1, upper_limit=20):
@@ -39,7 +42,12 @@ class TestNameAscii:
         '''Create directory: all valid ASCII one character names'''
         # Expected outcome: directory is created
 
-        for newdir_ord in (*range(1, 0x2E), *range(0x30, 0x80)):    # Exclude NUL(0x00), dot(0x2E) and forward slash(0x2F)
+        # Characters NUL(0x00), dot(0x2E) and forward slash(0x2F) will be excluded
+        # from this testcase. NUL and forward slash are being tested separately.
+        # Directory names '.' and '..' are reserved by operating system and
+        # usually are already present in every directory.
+
+        for newdir_ord in (*range(1, 0x2E), *range(0x30, 0x80)):    
             path_newdir = tmpdir.join(chr(newdir_ord))
 
             try:

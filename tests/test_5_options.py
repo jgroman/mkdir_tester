@@ -6,6 +6,9 @@ import sh
 
 
 class TestOptions:
+    """
+    Class for grouping tests of command line options.
+    """
 
     @pytest.mark.debug
     def test_option_no_operand(self):

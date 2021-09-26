@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import py
-import pytest
 import random
-
 import sh
 
 
 class TestNameUtf8:
+    """
+    Class for grouping basic directory creation tests using UTF-8 names.
+    """
 
     DIR_NAME_UTF8_LENGTH_MIN = 1
     DIR_NAME_UTF8_LENGTH_MAX = 63  # UTF-8 data-points can be up to 4 bytes long
