@@ -8,21 +8,21 @@ import pytest
 class TestPrerequisities:
 
     def test_import_packages(self):
-        '''Import required packages'''
+        '''Selfcheck: Import required packages'''
         try:
             import sh
         except ModuleNotFoundError:
-            pytest.fail(msg="Required packages (sh) are not installed")
+            pytest.fail(msg="Required package 'sh' is not installed")
 
     def test_mkdir_is_available(self):
-        '''Is mkdir available'''
+        '''Selfcheck: mkdir is available'''
         try:
             from sh import mkdir
         except ImportError:
             pytest.fail(msg="mkdir command is not available")
 
     def test_mkdir_is_executable(self):
-        '''Is mkdir executable'''
+        '''Selfcheck: mkdir is executable'''
         import sh
 
         assert os.access(sh.mkdir._path, os.X_OK), "mkdir command is not executable"

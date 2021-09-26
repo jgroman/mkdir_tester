@@ -1,48 +1,55 @@
 #!/usr/bin/env python3
 
+from io import StringIO
 import pytest
-
 import sh
 
 
 class TestOptions:
 
+    @pytest.mark.debug
+    def test_option_no_operand(self):
+        '''Option: no operand specified'''
+        # Expected outcome: mkdir displays error message, exit code = 1
+
+        err_output = StringIO()
+
+        try:
+            sh.mkdir(_err=err_output)
+        except sh.ErrorReturnCode as exc:
+            assert 'missing operand' in err_output.getvalue(), "Invalid STDERR output text"
+            assert exc.exit_code == 1, "Invalid exit code returned ({})".format(exc.exit_code)
+        else:
+            pytest.fail("Did not raise error when ran without any operands")
+
     def test_option_help(self):
-        """Invoke CLI option '--help'"""
+        """Option '--help'"""
         # Expected outcome: help text is displayed, exit code = 0
 
-        std_output = ''
-
-        def process_output(line):
-            nonlocal std_output
-            std_output += line
+        std_output = StringIO()
 
         try:
-            sh.mkdir("--help", _out=process_output)
+            sh.mkdir("--help", _out=std_output)
         except sh.ErrorReturnCode:
             pytest.fail("Returned with non-zero exit code")
         else:
-            assert 'Usage:' in std_output, "Invalid help text"
+            assert 'Usage:' in std_output.getvalue(), "Invalid help text"
 
     def test_option_version(self):
-        """Invoke CLI option '--version'"""
+        """Option '--version'"""
         # Expected outcome: version is displayed, exit code = 0
 
-        std_output = ''
-
-        def process_output(line):
-            nonlocal std_output
-            std_output += line
+        std_output = StringIO()
 
         try:
-            sh.mkdir("--version", _out=process_output)
+            sh.mkdir("--version", _out=std_output)
         except sh.ErrorReturnCode:
             pytest.fail("Returned with non-zero exit code")
         else:
-            assert 'mkdir (GNU coreutils)' in std_output, "Invalid version text"
+            assert 'mkdir (GNU coreutils)' in std_output.getvalue(), "Invalid version text"
 
     def test_option_parents_nested_dirs(self, tmpdir):
-        '''Create nested directories using '-p/--parents' CLI option'''
+        '''Option '-p/--parents': create nested directories'''
         # Expected outcome: Nested directory structure is created, exit code = 0
 
         PATH_MAX = 4096
@@ -83,7 +90,7 @@ class TestOptions:
             assert path_nested.check(), "Failed to create nested directories using '--parents' CLI option"
 
     def test_option_parents_suppress_error(self, tmpdir):
-        '''Recreate already existing directory using '-p/--parents' CLI option'''
+        '''Option '-p/--parents': ignore already existing directories'''
         # Expected outcome: mkdir recreates directory, exit code = 0
 
         path_newdir = tmpdir.join('testdir')
@@ -110,15 +117,62 @@ class TestOptions:
             # Directory should still exist
             assert path_newdir.check(), "Failed to recreate existing directory using '--parents' CLI option"
 
-    @pytest.mark.debug
-    def test_option_delimiter(self, tmpdir):
-        '''Create directory name starting with '-' using option list delimiter '--' '''
+    def test_option_parents_no_operand(self):
+        '''Option '-p/--parents': no operand'''
+        # Expected outcome: mkdir displays error message, exit code = 1
+
+        err_output = StringIO()
+
+        try:
+            sh.mkdir('-p', _err=err_output)
+        except sh.ErrorReturnCode as exc:
+            assert 'missing operand' in err_output.getvalue(), "Invalid STDERR output text"
+            assert exc.exit_code == 1, "Invalid exit code returned ({})".format(exc.exit_code)
+        else:
+            pytest.fail("Accepted '-p' CLI option without operand")
+
+        err_output = StringIO()
+
+        try:
+            sh.mkdir('--parents', _err=err_output)
+        except sh.ErrorReturnCode as exc:
+            assert 'missing operand' in err_output.getvalue(), "Invalid STDERR output text"
+            assert exc.exit_code == 1, "Invalid exit code returned ({})".format(exc.exit_code)
+        else:
+            pytest.fail("Accepted '--parents' CLI option without operand")
+
+    def test_option_mode_no_operand(self):
+        '''Option '-m/--mode': no operand'''
+        # Expected outcome: mkdir displays error message, exit code = 1
+
+        err_output = StringIO()
+
+        try:
+            sh.mkdir('-m', _err=err_output)
+        except sh.ErrorReturnCode as exc:
+            assert 'requires an argument' in err_output.getvalue(), "Invalid STDERR output text"
+            assert exc.exit_code == 1, "Invalid exit code returned ({})".format(exc.exit_code)
+        else:
+            pytest.fail("Accepted '-m' CLI option without operand")
+
+        err_output = StringIO()
+
+        try:
+            sh.mkdir('--mode', _err=err_output)
+        except sh.ErrorReturnCode as exc:
+            assert 'requires an argument' in err_output.getvalue(), "Invalid STDERR output text"
+            assert exc.exit_code == 1, "Invalid exit code returned ({})".format(exc.exit_code)
+        else:
+            pytest.fail("Accepted '--mode' CLI option without operand")
+
+    def test_option_delimiter_create_dir(self, tmpdir):
+        '''Option '--': create directory name starting with '-' '''
         # Expected outcome: directory is created, exit code = 0
-    
+
         name_newdir = '-a'
         path_newdir = tmpdir.join(name_newdir)
         tmpdir.chdir()
-        
+
         try:
             sh.mkdir('--', name_newdir)
         except sh.ErrorReturnCode:
@@ -127,20 +181,30 @@ class TestOptions:
             # Directory should exist
             assert path_newdir.check(), "Failed to create directory '{}'".format(name_newdir)
 
-    def test_option_unknown(self):
-        '''Invoke CLI option unknown'''
-        # Expected outcome: 'unrecognized option' text is displayed, exit code = 1
+    def test_option_delimiter_no_operand(self):
+        '''Option '--': no operand'''
+        # Expected outcome: mkdir displays error message, exit code = 1
 
-        err_output = ''
-
-        def process_error(line):
-            nonlocal err_output
-            err_output += line
+        err_output = StringIO()
 
         try:
-            sh.mkdir("--aaaaaaaaaa", _err=process_error)
+            sh.mkdir('--', _err=err_output)
         except sh.ErrorReturnCode as exc:
-            assert 'unrecognized option' in err_output, "Invalid STDERR output text"
+            assert 'missing operand' in err_output.getvalue(), "Invalid STDERR output text"
+            assert exc.exit_code == 1, "Invalid exit code returned ({})".format(exc.exit_code)
+        else:
+            pytest.fail("Accepted '--' CLI option without operand")
+
+    def test_option_unknown(self):
+        '''Option unknown'''
+        # Expected outcome: 'unrecognized option' text is displayed, exit code = 1
+
+        err_output = StringIO()
+
+        try:
+            sh.mkdir("--aaaaaaaaaa", _err=err_output)
+        except sh.ErrorReturnCode as exc:
+            assert 'unrecognized option' in err_output.getvalue(), "Invalid STDERR output text"
             assert exc.exit_code == 1, "Invalid exit code returned ({})".format(exc.exit_code)
         else:
             pytest.fail("Failed to return non-zero exit code")

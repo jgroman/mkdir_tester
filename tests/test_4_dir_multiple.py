@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import py
-import pytest
 import sh
 
 
@@ -15,7 +14,7 @@ class TestDirMultiple:
             yield tmpdir.join(name)
 
     def test_create_multiple_dirs_same_level(self, tmpdir):
-        '''Create multiple directories'''
+        '''Create directory: multiple siblings'''
         # Expected outcome: all directories are created
 
         # ext4 limit is 64000 items in a directory

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This testing suite aims to test some parts of `mkdir` shell command functionality with special regard to Oracle Linux 8.
+This testing suite aims to test some parts of `mkdir` shell command functionality.
 
 ## Quick start
 
@@ -40,6 +40,10 @@ pytest -p no:pytest_custom_output
 
 ## Test approach
 
+Tested tool `mkdir` will be run from within Python script using `sh` package which will allow control of input parameters, STDOUT and STDERR outputs and application exit codes. Testing will be automated using `pytest` framework. Output from `pytest` framework will be customized into required format using `pytest` plugin.
+
+Testing will focus on most common `mkdir` usage patterns and user errors. Selected testcases will also cover invalid input values.
+
 ## Documentation
 
 Man pages
@@ -54,7 +58,7 @@ UTF-8
 
 - [UTF-8 test file](docs/UTF-8-test.txt)
 
-## Extra Notes
+## Misc Notes
 
 ### Files and filename restrictions
 

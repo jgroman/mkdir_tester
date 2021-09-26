@@ -45,9 +45,10 @@ class TestNameUtf8:
         return ''.join(random.choice(alphabet) for _ in range(rand_length))
 
     def test_create_dir_utf8(self, tmpdir):
-        '''Create directory with valid UTF-8 random length name'''
+        '''Create directory: random length UTF-8 name'''
         name_newdir = TestNameUtf8.get_random_utf8_string(
             TestNameUtf8.DIR_NAME_UTF8_LENGTH_MIN, TestNameUtf8.DIR_NAME_UTF8_LENGTH_MAX)
+        name_newdir = name_newdir.replace('/', '')
         path_newdir = tmpdir.join(name_newdir)
 
         # Make sure directory doesn't already exist

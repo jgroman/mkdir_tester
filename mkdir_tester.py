@@ -3,7 +3,6 @@
 mkdir_tester package placeholder file
 '''
 
-
 if __name__ == "__main__":
     print("""mkdir_tester.py
 

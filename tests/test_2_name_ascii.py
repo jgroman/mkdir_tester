@@ -25,7 +25,7 @@ class TestNameAscii:
         return ''.join(random.choice(chars) for _ in range(rand_length))
 
     def test_create_dir_name_empty(self):
-        '''Try creating empty directory name'''
+        '''Create directory: empty name'''
         # Expected outcome: mkdir exits with error code 1
 
         try:
@@ -36,7 +36,7 @@ class TestNameAscii:
             pytest.fail("Accepted empty string as directory name")
 
     def test_create_dir_name_one_ascii_char(self, tmpdir):
-        '''Create directories with all valid ASCII one character names'''
+        '''Create directory: all valid ASCII one character names'''
         # Expected outcome: directory is created
 
         for newdir_ord in (*range(1, 0x2E), *range(0x30, 0x80)):    # Exclude NUL(0x00), dot(0x2E) and forward slash(0x2F)
@@ -51,7 +51,7 @@ class TestNameAscii:
                 assert path_newdir.check(), "Failed to create directory '{}'".format(curses.ascii.unctrl(chr(newdir_ord)))
 
     def test_create_dir_name_one_nul_char(self, tmpdir):
-        '''Try creating directory name as NUL character only'''
+        '''Create directory: name as NUL character only'''
         # Expected outcome:  mkdir exits with error code 1
         # Results may vary depending on used shell
 
@@ -68,7 +68,7 @@ class TestNameAscii:
             pytest.fail("Accepted NUL character as directory name")
 
     def test_create_dir_name_contains_nul_char(self, tmpdir):
-        '''Try creating directory name containing NUL character'''
+        '''Create directory: name containing NUL character'''
         # Expected outcome: shell dependent, in bash mkdir creates directory name
         # containing part of requested name up to NUL character
 
@@ -87,7 +87,7 @@ class TestNameAscii:
             assert path_newdir.check(), "Failed to create directory '{}'".format(path_newdir)
 
     def test_create_dir_name_ascii_length_max(self, tmpdir):
-        '''Create directory with valid ASCII max length name'''
+        '''Create directory: max allowed length ASCII name'''
         # Expected outcome: directory is created
 
         name_newdir = TestNameAscii.get_random_string(
@@ -103,7 +103,7 @@ class TestNameAscii:
             assert path_newdir.check(), "Failed to create directory '{}'".format(path_newdir)
 
     def test_create_dir_name_length_over_max(self, tmpdir):
-        '''Try creating directory name longer than allowed'''
+        '''Create directory: name longer than allowed'''
         # Expected outcome: mkdir fails with exit code 1
 
         name_newdir = TestNameAscii.get_random_string(string.ascii_letters,
@@ -118,7 +118,7 @@ class TestNameAscii:
             pytest.fail("Accepted too long string as directory name")
 
     def test_create_dir_name_existing(self, tmpdir):
-        '''Try creating directory name already existing'''
+        '''Create directory: name already exists'''
         # Expected outcome: mkdir fails with exit code 1
 
         name_newdir = TestNameAscii.get_random_string(
