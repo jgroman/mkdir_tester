@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 '''
-Custom pytest output plugin
+pytest custom output plugin
 
-
-Portions of code adopted from:
-
-https://github.com/freakboy3742/pytest-tldr
-https://github.com/pchomik/pytest-spec
-
+Configures test result output in following format:
+      - When check passed print on stdout: "[PASS] <description of check>"
+      - When check failed print on stdout: "[FAIL] <description of check, explanation of failure>"
+      - If any check inside test script failed exit returning 1
+        and print on stdout: "/**TEST FAILED: <number of failed checks, summary>**/"
+      - If all check passed it should exit returning 0 and print on
+        stdout: "/**TEST PASSED: <summary>**/"
 '''
+
+# Portions of code adopted from:
+# https://github.com/freakboy3742/pytest-tldr
+# https://github.com/pchomik/pytest-spec
 
 
 from __future__ import print_function
@@ -259,12 +264,19 @@ class CustomReporter:
                 total_fails = len(failures) + len(errors) + len(upasses)
                 self.print("/** TEST FAILED: {} ({}), total {} **/".format(
                     total_fails, ", ".join(problems), self._n_tests))
-                # Override pytest default exit code
-                #pytest.exit(msg=None, returncode=1)
             elif skips or xfails:
                 self.print(
                     "/** TEST PASSED: {} ({}) **/".format(self._n_tests, ", ".join(problems)))
-                # Override pytest default exit code
-                pytest.exit(returncode=0)
             else:
                 self.print("/** TEST PASSED: {} **/".format(self._n_tests))
+
+
+if __name__ == "__main__":
+    print("""pytest_custom_output.py pytest plugin
+
+This script should not be run directly but rather configured as pytest plugin
+and loaded using following directive in conftest.py configuration file:
+
+pytest_plugins = ("pytest_custom_output")
+
+    """)

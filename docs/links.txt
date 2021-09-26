@@ -1,3 +1,0 @@
-sh package
-  https://amoffat.github.io/sh/
-

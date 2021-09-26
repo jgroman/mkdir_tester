@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
+'''
+pytest incremental testing setup plugin
+'''
 
-# Incremental testing setup
+# Adopted from
 # https://docs.pytest.org/en/latest/example/simple.html#incremental-testing-test-steps
 
 import pytest
@@ -53,3 +56,20 @@ def pytest_runtest_setup(item):
             # if name found, test has failed for the combination of class name & test name
             if test_name is not None:
                 pytest.xfail("previous test failed ({})".format(test_name))
+
+
+if __name__ == "__main__":
+    print("""pytest_mark_incremental.py pytest plugin
+
+This script should not be run directly but rather configured as pytest plugin
+and loaded using following directive in conftest.py configuration file:
+
+pytest_plugins = ("pytest_mark_incremental")
+
+Also please remember to add custom 'incremental' marker definition to pytest.ini:
+
+[pytest]
+markers =
+    incremental: Enables forced test skipping if previous step failed
+
+    """)
